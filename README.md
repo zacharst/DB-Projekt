@@ -6,13 +6,13 @@ Dieses Projekt erstellt und verwaltet eine **Hochschulsport-Datenbank** mit eine
 
 ## Installation
 
-1. **Benötigte Pakete installieren**
+### 1. **Benötigte Pakete installieren**
 
    ```bash
    pip install -r requirements.txt
    ```
 
-2. **Setup ausführen**
+### 2. **Setup ausführen**
 
    * Startskript:
 
@@ -25,7 +25,7 @@ Dieses Projekt erstellt und verwaltet eine **Hochschulsport-Datenbank** mit eine
      * Speichern der Zugangsdaten
      * Automatisches Erstellen der Datenbank *Hochschulsport*
 
-   ### 🔧 Alternative (manuell)
+   ### Alternative (manuell)
 
    * Datenbankzugangsdaten in `.streamlit/secrets.toml` eintragen:
 
@@ -33,13 +33,13 @@ Dieses Projekt erstellt und verwaltet eine **Hochschulsport-Datenbank** mit eine
      [mysql]
      host = "localhost"
      port = 3306
-     user = "root"
-     password = "dein_passwort"
-     database = "hochschulsport"
+     username = "enterusername"
+     password = "enterpassword"
+     database = "databasename"
      ```
    * SQL-Datei manuell ausführen, um die Datenbank zu erstellen.
 
-3. **Streamlit App starten**
+### 3. **Streamlit App starten**
 
    ```bash
    streamlit run app.py
