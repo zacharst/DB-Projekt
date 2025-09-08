@@ -1,0 +1,9 @@
+{
+  "beschäftigte": [
+    {
+    "join_table": "Kursteilnehmer",
+    "join_on": ["teilnehmer_id"],
+    "display_columns": ["teilnehmer_name"]
+    }
+    ]
+}
