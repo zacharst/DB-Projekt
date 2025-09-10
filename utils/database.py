@@ -11,23 +11,21 @@ SECRETS_PATH = os.path.join(".streamlit","secrets.toml")
 
 
 def get_connection(user=None, password=None, host="localhost", database="hochschulsport"):
-    import toml
     """
     Stellt eine Verbindung zur MySQL-Datenbank her.
 
     Falls kein user oder pw angegeben: 
     Liest Zugangsdaten aus .streamlit/secrets.toml und gibt eine offene Verbindung zurück.
-    
+
     Returns:
         mysql.connector.connection_cext.CMySQLConnection: Datenbankverbindung
     """
     if user is None or password is None:
-        secrets_file = ".streamlit/secrets.toml"
-        data = toml.load(secrets_file)
-        user = data["mysql"]["username"]
-        password = data["mysql"]["password"]
-        host = data["mysql"]["host"]
-        database = data["mysql"]["database"]
+        secrets = toml.load(SECRETS_PATH)
+        user = secrets["mysql"]["username"]
+        password = secrets["mysql"]["password"]
+        host = secrets["mysql"]["host"]
+        database = secrets["mysql"]["database"]
 
     conn = mysql.connector.connect(
         host=host,

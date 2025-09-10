@@ -7,7 +7,9 @@ from components.sql_runner_simple import run_custom_query
 from components.sql_filter_runner import run_sql_filter
 from setup import test_connection
 
-
+# 2 Nutzer:
+# verwaltung (pw:1234)
+# kursleiter (pw:12345)
 
 def main():
     st.title("Hochschulsport")
@@ -22,12 +24,14 @@ def main():
     with st.sidebar:
         st.subheader("Nutzerzugang")
 
+        #Default View - Ansicht für Kursteilnehmer
         if st.session_state["default_view"]:
             if st.button("Login für Nutzer"):
                 st.session_state["show_login"] = True
                 st.session_state["default_view"] = False
                 st.rerun()
 
+        # Show-Login - Sobald Loginbutton gedrückt wurde
         if st.session_state["show_login"]:
             st.session_state["default_view"] = False
             user = st.text_input("Nutzername")
@@ -42,6 +46,7 @@ def main():
                 else:
                     st.error("Login fehlgeschlagen. Prüfen Sie Benutzername/Passwort.")
 
+        #Show-Logout: Nutzer ist eingelogged (Verwaltung oder Kursleiter)
         if st.session_state["show_logout"]:
             st.success(f"Erfolgreich als {st.session_state['sql_user']} verbunden!")
             if st.button("Abmelden"):
@@ -56,6 +61,7 @@ def main():
             password=st.session_state["sql_password"]
         )
 
+    ## Nur Verwaltung und Kursleiter kriegen SQL-Abfrage und SQL-Filter angezeigt
     if st.session_state["show_logout"]:
         tabs = ["Tabelle anzeigen", "SQL-Abfrage", "SQL-Filter"]
         active_tab = st.radio("Wähle einen Tab", tabs, index=0)
