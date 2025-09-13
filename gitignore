@@ -1,8 +1,0 @@
-__pycache__/
-*.pyc
-.venv/
-todo.txt
-tempCodeRunnerFile.py
-tests/
-.gitignore
-.streamlit/
