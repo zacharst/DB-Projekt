@@ -9,24 +9,30 @@ JOIN_CONFIG_PATH = os.path.join("utils","join_config.json")
 SECRETS_PATH = os.path.join(".streamlit","secrets.toml")
 
 
-def get_connection():
+def get_connection(user=None, password=None, host="localhost", database="hochschulsport"):
     """
     Stellt eine Verbindung zur MySQL-Datenbank her.
 
+    Falls kein user oder pw angegeben: 
     Liest Zugangsdaten aus .streamlit/secrets.toml und gibt eine offene Verbindung zurück.
 
     Returns:
         mysql.connector.connection_cext.CMySQLConnection: Datenbankverbindung
     """
-    secrets = toml.load(SECRETS_PATH)
+    if user is None or password is None:
+        secrets = toml.load(SECRETS_PATH)
+        user = secrets["mysql"]["username"]
+        password = secrets["mysql"]["password"]
+        host = secrets["mysql"]["host"]
+        database = secrets["mysql"]["database"]
+
     conn = connect(
-        host=secrets["mysql"]["host"],
-        user=secrets["mysql"]["username"],
-        password=secrets["mysql"]["password"],
-        database=secrets["mysql"]["database"]
+        host=host,
+        user=user,
+        password=password,
+        database=database
     )
     return conn
-
 
 def load_dataframe(conn, table_name, apply_joins=False):
     """
