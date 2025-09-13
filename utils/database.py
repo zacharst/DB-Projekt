@@ -4,7 +4,6 @@ from mysql.connector import connect
 import pandas as pd
 import json
 import os
-import mysql.connector
 
 JOIN_CONFIG_PATH = os.path.join("utils","join_config.json")
 SECRETS_PATH = os.path.join(".streamlit","secrets.toml")
@@ -27,7 +26,7 @@ def get_connection(user=None, password=None, host="localhost", database="hochsch
         host = secrets["mysql"]["host"]
         database = secrets["mysql"]["database"]
 
-    conn = mysql.connector.connect(
+    conn = connect(
         host=host,
         user=user,
         password=password,
