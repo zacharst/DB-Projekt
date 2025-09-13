@@ -1,3 +1,4 @@
+# app.py
 import streamlit as st
 from utils.database import get_connection
 from components.sidebar import show_sidebar
@@ -12,12 +13,24 @@ from setup import test_connection
 # kursleiter (pw:12345)
 
 def main():
+    """
+    Startet die Streamlit-App mit einem Tab:
+    1. Tabelle anzeigen: Zeigt eine ausgewählte Tabelle mit optionalen Filtern per Pandas an. 
+       Joins mithilfe von join_config.json möglich.
+    
+    Bietet Login an
+    2. SQL-Abfrage: Führt freie SQL-Queries aus.
+    3. SQL-Filter: Wendet Sidebar-Filter parametriert auf die Datenbank an.
+    
+    Liest Tabellen und Filter aus der Sidebar, verwaltet Limits und gibt
+    Ergebnisse als DataFrame oder CSV aus.
+    """
     st.title("Hochschulsport")
 
     if "default_view" not in st.session_state:
         st.session_state["default_view"] = True
         st.session_state["show_login"] = False
-        st.session_state["show_logout"] = False
+        st.session_state["logged_in"] = False
         st.session_state["sql_user"] = None
         st.session_state["sql_password"] = None
 
@@ -41,17 +54,17 @@ def main():
                     st.session_state["sql_user"] = user
                     st.session_state["sql_password"] = password
                     st.session_state["show_login"] = False
-                    st.session_state["show_logout"] = True
+                    st.session_state["logged_in"] = True
                     st.rerun()
                 else:
                     st.error("Login fehlgeschlagen. Prüfen Sie Benutzername/Passwort.")
 
         #Show-Logout: Nutzer ist eingelogged (Verwaltung oder Kursleiter)
-        if st.session_state["show_logout"]:
+        if st.session_state["logged_in"]:
             st.success(f"Erfolgreich als {st.session_state['sql_user']} verbunden!")
             if st.button("Abmelden"):
                 st.session_state["default_view"] = True
-                st.session_state["show_logout"] = False
+                st.session_state["logged_in"] = False
                 st.session_state["sql_user"] = None
                 st.session_state["sql_password"] = None
                 st.rerun()
@@ -62,11 +75,13 @@ def main():
         )
 
     ## Nur Verwaltung und Kursleiter kriegen SQL-Abfrage und SQL-Filter angezeigt
-    if st.session_state["show_logout"]:
+    if st.session_state["logged_in"]:
         tabs = ["Tabelle anzeigen", "SQL-Abfrage", "SQL-Filter"]
         active_tab = st.radio("Wähle einen Tab", tabs, index=0)
     else:
-        active_tab = "Tabelle anzeigen"
+        tabs = ["Tabelle anzeigen", "SQL-Filter"]
+        active_tab = st.radio("Wähle einen Tab", tabs, index=0)
+        
 
     with st.sidebar:
         selected_table, filters, limit_active, default_limit, df_for_filters = show_sidebar(conn, active_tab)
