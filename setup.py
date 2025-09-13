@@ -6,7 +6,7 @@ from tkinter import simpledialog, messagebox
 import toml
 import re
 
-SCHEMA_FILE = os.path.join("dbs_2.sql")
+SCHEMA_FILE = os.path.join("SQL Dateien","dbs_2.sql")
 SECRETS_FILE = os.path.join(".streamlit", "secrets.toml")
 
 
