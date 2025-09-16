@@ -102,12 +102,13 @@ def main():
         run_custom_query()
 
     elif active_tab == "SQL-Filter":
+        limit_to_use = default_limit if limit_active else None
         st.title("SQL-Filter")
         if df_for_filters is None or selected_table is None:
             st.info("Bitte wähle eine Tabelle in der Sidebar.")
         else:
             with st.spinner("Führe parametrisierten SQL-Filter aus..."):
-                run_sql_filter(conn, selected_table, filters, limit=default_limit)
+                run_sql_filter(conn, selected_table, filters, limit=limit_to_use)
 
 
 if __name__ == "__main__":
