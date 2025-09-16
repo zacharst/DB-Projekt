@@ -1,5 +1,5 @@
 import json
-from pypika import Query, Table
+from pypika import Query
 from pypika.terms import Field
 import streamlit as st
 import pandas as pd
@@ -77,14 +77,12 @@ def build_sql_query(conn, table_name, filters, limit):
     return sql, params
 
 def run_sql_filter(conn, table_name, filters, limit):
-    print(f"runs sql filte rlimit = {limit} ")
     """
     Baut eine parametrisierte SELECT-Abfrage aus Filtern.
     Führt diese aus und zeigt das Ergebnis an.
     """
     allowed_cols = get_table_columns(conn, table_name)
     if not allowed_cols:
-        print("Konnte Spalten der Tabelle nicht ermitteln.")
         return
 
     term, params = build_where_clause(filters, allowed_cols)
@@ -96,22 +94,11 @@ def run_sql_filter(conn, table_name, filters, limit):
         query = query.limit(limit)
 
     sql = str(query)
-    print(f"sql pre change {sql}")
     sql = sql.replace('"',"`")  # MySQL Backticks
-    print("################ \n")
-    print(f"Ausgeführte SQL-Abfrage: {sql}")
-    print(f"Parameter: {params}")
-
-    """cursor = conn.cursor(prepared=True)
-    cursor.execute(sql, params)
-    rows = cursor.fetchall()
-    cols = [desc[0] for desc in cursor.description]
-    df = pd.DataFrame(rows, columns=cols)"""
-
 
     st.subheader("Ausgeführte SQL-Abfrage:")
     st.code(sql, language="sql", line_numbers=True, wrap_lines=True)
-    st.write(f"Parameter: {params}")
+    #st.write(f"Parameter: {params}")
 
     cursor = None
     try:
