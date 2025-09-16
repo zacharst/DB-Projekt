@@ -76,7 +76,8 @@ def build_sql_query(conn, table_name, filters, limit):
     sql = sql.replace('"', "`")
     return sql, params
 
-def run_sql_filter(conn, table_name, filters, limit=1000):
+def run_sql_filter(conn, table_name, filters, limit):
+    print(f"runs sql filte rlimit = {limit} ")
     """
     Baut eine parametrisierte SELECT-Abfrage aus Filtern.
     Führt diese aus und zeigt das Ergebnis an.
@@ -91,7 +92,7 @@ def run_sql_filter(conn, table_name, filters, limit=1000):
     query = Query.from_(table_name).select("*")
     if term:
         query = query.where(term)
-    if limit:
+    if limit: #limit deaktiviert -> limit = None
         query = query.limit(limit)
 
     sql = str(query)
@@ -115,7 +116,7 @@ def run_sql_filter(conn, table_name, filters, limit=1000):
     cursor = None
     try:
         cursor = conn.cursor(buffered=True)
-        cursor.execute(sql, tuple(params))
+        cursor.execute(sql)
         rows = cursor.fetchall()
         if cursor.description:
             cols = [c[0] for c in cursor.description]
