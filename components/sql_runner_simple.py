@@ -20,8 +20,8 @@ def run_custom_query():
             conn = get_connection()
             cursor = conn.cursor()
 
-            # Überprüfen, ob es sich um eine SELECT-Anweisung handelt
-            if sql.strip().upper().startswith("SELECT"):
+            # Überprüfen, ob es sich um eine SELECT-Anweisung oder eien SHOW-Anweisung handelt
+            if sql.strip().upper().startswith("SELECT") or sql.strip().upper().startswith("SHOW"):
                 cursor.execute(sql)
                 data = cursor.fetchall()
 
