@@ -96,8 +96,17 @@ def run_sql_filter(conn, table_name, filters, limit):
     sql = str(query)
     sql = sql.replace('"',"`")  # MySQL Backticks
 
-    st.subheader("Ausgeführte SQL-Abfrage:")
-    st.code(sql, language="sql", line_numbers=True, wrap_lines=True)
+    if "show_sql" not in st.session_state:
+        st.session_state.show_sql = False
+
+    
+    def toggle_sql():
+        st.session_state.show_sql = not st.session_state.show_sql
+    st.button("SQL Query anzeigen/ausblenden", on_click=toggle_sql)
+
+    if st.session_state.show_sql:
+        st.subheader("Ausgeführte SQL-Abfrage:")
+        st.code(sql, language="sql", line_numbers=True, wrap_lines=True)
     #st.write(f"Parameter: {params}")
 
     cursor = None
