@@ -8,6 +8,8 @@ from components.sql_runner_simple import run_custom_query
 from components.sql_filter_runner import run_sql_filter
 from setup import test_connection
 
+from components.table_editor import table_editor
+
 # 2 Nutzer:
 # verwaltung (pw:1234)
 # kursleiter (pw:12345)
@@ -76,7 +78,7 @@ def main():
 
     ## Nur Verwaltung und Kursleiter kriegen SQL-Abfrage und SQL-Filter angezeigt
     if st.session_state["logged_in"]:
-        tabs = ["Tabelle anzeigen", "SQL-Abfrage", "SQL-Filter"]
+        tabs = ["Tabelle anzeigen", "SQL-Abfrage", "SQL-Filter","Tabelle bearbeiten"]
         active_tab = st.radio("Wähle einen Tab", tabs, index=0)
     else:
         tabs = ["Tabelle anzeigen", "SQL-Filter"]
@@ -110,6 +112,11 @@ def main():
             with st.spinner("Führe parametrisierten SQL-Filter aus..."):
                 run_sql_filter(conn, selected_table, filters, limit=limit_to_use)
 
+    elif active_tab == "Tabelle bearbeiten":
+        if selected_table is None:
+            st.info("Bitte wähle eine Tablle in der Sidebar aus.")
+        else:
+            table_editor(conn,selected_table)
 
 if __name__ == "__main__":
     main()
