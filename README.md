@@ -47,3 +47,6 @@ Dieses Projekt erstellt und verwaltet eine **Hochschulsport-Datenbank** mit eine
 
    Danach öffnet sich die Oberfläche automatisch im Browser.
 
+### 4. **2 Mögliche Nutzer**
+  * verwaltung (pw:1234)
+  * kursleiter (pw:12345)
