@@ -16,8 +16,10 @@ def show_sidebar(conn, active_tab: str, apply_joins: bool = False):
     Returns:
         tuple: (selected_table, filters, limit_active, default_limit, df_for_filters)
     """
-    if active_tab not in ("Tabelle anzeigen", "SQL-Filter"):
+    if active_tab not in ("Tabelle anzeigen","Tabelle bearbeiten"):
         return None, {}, False, 1000, None
+    
+
 
     st.header("Navigation / Auswahl")
 
@@ -28,6 +30,9 @@ def show_sidebar(conn, active_tab: str, apply_joins: bool = False):
     cursor.close()
 
     selected_table = st.selectbox("Wähle eine Tabelle", tables)
+
+    if active_tab == "Tabelle bearbeiten":
+        return selected_table,{}, False, None, None
 
     st.markdown("---")
     st.write("Einstellungen")
