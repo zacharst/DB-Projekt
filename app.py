@@ -96,7 +96,7 @@ def main():
 
     elif active_tab == "Tabelle anzeigen":
         limit_to_use = default_limit if limit_active else None
-        st.title("SQL-Filter")
+        st.title("Tabelle anzeigen")
         if df_for_filters is None or selected_table is None:
             st.info("Bitte wähle eine Tabelle in der Sidebar.")
         else:
