@@ -6,7 +6,7 @@ from tkinter import simpledialog, messagebox
 import toml
 import re
 
-SCHEMA_FILE = os.path.join("SQL Dateien","dbs_2.sql")
+SCHEMA_FILE = os.path.join("SQL Dateien","dbs_3.sql")
 SECRETS_FILE = os.path.join(".streamlit", "secrets.toml")
 
 
@@ -63,8 +63,14 @@ def run_sql(user, pwd, host="localhost"):
     # Entferne Trigger aus dem SQL-Code
     sql_without_triggers = trigger_pattern.sub("", sql)
 
+
+    # Extrahiere INSERT INTO mit regulärem Ausdruck
+    insert_pattern = re.compile(r"(INSERT\s+INTO\b.*?;)", re.DOTALL | re.IGNORECASE)
+    inserts = insert_pattern.findall(sql_without_triggers)
+    sql_without_triggers_and_insert = insert_pattern.sub("", sql_without_triggers)  # INSERTs aus dem SQL entfernen
+
     # Führe alle anderen SQL-Statements aus
-    statements = [stmt.strip() for stmt in sql_without_triggers.split(";") if stmt.strip()]
+    statements = [stmt.strip() for stmt in sql_without_triggers_and_insert.split(";") if stmt.strip()]
     for stmt in statements:
         cursor.execute(stmt)
         try:
@@ -74,9 +80,32 @@ def run_sql(user, pwd, host="localhost"):
 
     # Führe die extrahierten Trigger separat aus
     for trigger in triggers:
-        trigger = trigger.replace("$$", ";")  # Ersetze $$ durch ;
-        cursor.execute(trigger)
-
+        trigger_stmt = trigger.replace("$$", ";")  # Ersetze $$ durch ;
+        try:
+            cursor.execute(trigger_stmt)
+            try:
+                cursor.fetchall()
+            except mysql.connector.errors.InterfaceError:
+                pass
+        except mysql.connector.Error as e:
+            #erste 100 Zeichen
+            messagebox.showerror("Trigger-Fehler", f"Fehler beim Erstellen eines Triggers:\n{e}\n\nTrigger:\n{trigger_stmt[:100]}...")
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            return
+        
+    for insert in inserts:
+        try:
+            cursor.execute(insert)
+        except mysql.connector.Error as e:
+            #erste 100 Zeichen
+            messagebox.showerror("INSERT-Fehler", f"Fehler beim Ausführen eines INSERTs:\n{e}\n\nINSERT:\n{insert[:100]}...")
+            conn.rollback()
+            cursor.close()
+            conn.close()
+            return
+        
     conn.commit()
     cursor.close()
     conn.close()
