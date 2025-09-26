@@ -20,7 +20,7 @@ def confirm_reset():
     root.withdraw()
     return messagebox.askyesno(
         "Achtung!",
-        "Willst du wirklich alle Rollen, Benutzer und die Datenbank löschen?"
+        "Willst du wirklich alle Rollen, Benutzer, Rechte und die Datenbank löschen?"
     )
 
 def reset_db(user: str, password: str, host: str = HOST):
@@ -28,24 +28,29 @@ def reset_db(user: str, password: str, host: str = HOST):
         conn = mysql.connector.connect(host=host, user=user, password=password)
         cursor = conn.cursor()
 
+        # Alle Rechte von Benutzern aufheben
+        for u in USERS:
+            cursor.execute(f"REVOKE ALL PRIVILEGES, GRANT OPTION FROM '{u}'@'localhost';")
+
+        # Rollenrechte zurücksetzen (REVOKE funktioniert nur über Rollen, nicht direkt auf Tabellen)
+        for role in ROLES:
+            cursor.execute(f"REVOKE ALL PRIVILEGES, GRANT OPTION FROM `{role}`;")
+
         # Rollen löschen
         for role in ROLES:
             cursor.execute(f"DROP ROLE IF EXISTS `{role}`;")
-            #print(f"Rolle {role} gelöscht (falls vorhanden).")
 
         # Benutzer löschen
         for u in USERS:
             cursor.execute(f"DROP USER IF EXISTS '{u}'@'localhost';")
-            #print(f"Benutzer {u} gelöscht (falls vorhanden).")
 
         # Datenbank löschen
         cursor.execute(f"DROP DATABASE IF EXISTS `{DATABASE}`;")
-        #print(f"Datenbank {DATABASE} gelöscht (falls vorhanden).")
 
         conn.commit()
         cursor.close()
         conn.close()
-        messagebox.showinfo("Erfolg", "Rollen, Benutzer und Datenbank wurden gelöscht!")
+        messagebox.showinfo("Erfolg", "Alle Rollen, Benutzer, Rechte und die Datenbank wurden gelöscht!")
     except mysql.connector.Error as e:
         messagebox.showerror("Fehler", f"Fehler bei der Datenbankoperation:\n{e}")
 
@@ -68,7 +73,7 @@ def main():
     if not user or not pwd:
         messagebox.showwarning("Abbruch", "Keine Zugangsdaten eingegeben.")
         return
-    if not test_connection(user,pwd):
+    if not test_connection(user, pwd):
         return
     if confirm_reset():
         reset_db(user, pwd)
