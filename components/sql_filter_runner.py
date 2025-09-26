@@ -1,42 +1,43 @@
-# components/sql_filter_runner.py
+import json
+from pypika import Query
+from pypika.terms import Field
 import streamlit as st
 import pandas as pd
 
+JOIN_CONFIG_PATH = "utils/join_config.json"
 
+def load_join_config():
+    """Lädt die Join-Konfiguration aus der JSON-Datei."""
+    with open(JOIN_CONFIG_PATH, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-
-
-def build_where_clause(filters: dict, allowed_cols: list) -> tuple:
+def build_where_clause(filters, allowed_cols):
     """
-    Erzeugt die WHERE-Klausel mit zugehörige Parameter aus den angegebenen Filtern.
-
-    Args:
-        filters (dict): Filter im Format {col: (min,max) | [v1,v2,...]}.
-        allowed_cols (list): Liste der erlaubten Spalten.
-
-    Returns:
-        tuple: (where_sql, params_list)
+    Erstellt PyPika-Terms für WHERE-Klausel.
     """
     clauses = []
     params = []
-
     for col, val in filters.items():
-
-        if isinstance(val, tuple):
-            clauses.append(f"`{col}` BETWEEN %s AND %s")
+        if col not in allowed_cols:
+            continue
+        field = Field(col)
+        if isinstance(val, tuple):  # min/max
+            clauses.append(field.between(val[0], val[1]))
             params.extend([val[0], val[1]])
-        elif isinstance(val, list):
-            if not val:
-                continue
-            placeholders = ", ".join(["%s"] * len(val))
-            clauses.append(f"`{col}` IN ({placeholders})")
+        elif isinstance(val, list) and val:
+            clauses.append(field.isin(val))
             params.extend(val)
+    # Kombiniere alle Klauseln mit AND
+    if clauses:
+        term = clauses[0]
+        for c in clauses[1:]:
+            term &= c
+        return term, params
+    else:
+        return None, params
+    
 
-    where_sql = " AND ".join(clauses) if clauses else ""
-    return where_sql, params
-
-
-def _get_table_columns(conn, table_name: str) -> list:
+def get_table_columns(conn, table_name: str) -> list:
     """
     Holt die Spaltennamen einer Tabelle mit LIMIT 0 SELECT.
 
@@ -61,41 +62,57 @@ def _get_table_columns(conn, table_name: str) -> list:
         if cursor:
             cursor.close()
 
+def build_sql_query(conn, table_name, filters, limit):
+    """Erstellt die SQL-Abfrage basierend auf den Filtern und dem Limit."""
+    allowed_cols = get_table_columns(conn, table_name)
+    where_sql, params = build_where_clause(filters, allowed_cols)
+    query = Query.from_(table_name).select("*")
+    if where_sql:
+        query = query.where(where_sql)
+    if limit:
+        query = query.limit(limit)
+    sql = str(query)
+    # Ersetze doppelte Anführungszeichen durch Backticks für MySQL
+    sql = sql.replace('"', "`")
+    return sql, params
 
-def run_sql_filter(conn, table_name: str, filters: dict, limit: int = 1000):
+def run_sql_filter(conn, table_name, filters, limit):
     """
     Baut eine parametrisierte SELECT-Abfrage aus Filtern.
     Führt diese aus und zeigt das Ergebnis an.
-
-    Args:
-        conn: Datenbankverbindung
-        table_name (str): Tabelle, auf die die Filter angewendet werden.
-        filters (dict): Filter wie von build_filters() erzeugt.
-        limit (int, optional): Maximale Anzahl Zeilen.
-
-    Zeigt die SQL-Abfrage, das Ergebnis als DataFrame und einen CSV-Download-Button in Streamlit.
     """
-    allowed_cols = _get_table_columns(conn, table_name)
+    allowed_cols = get_table_columns(conn, table_name)
     if not allowed_cols:
-        st.error("Konnte Spalten der Tabelle nicht ermitteln.")
         return
 
-    where_sql, params = build_where_clause(filters, allowed_cols)
+    term, params = build_where_clause(filters, allowed_cols)
 
-    sql = f"SELECT * FROM `{table_name}`"
-    if where_sql:
-        sql += " WHERE " + where_sql
-    if "LIMIT" not in sql.upper():
-        sql += f" LIMIT {int(limit)}"
+    query = Query.from_(table_name).select("*")
+    if term:
+        query = query.where(term)
+    if limit: #limit deaktiviert -> limit = None
+        query = query.limit(limit)
 
-    st.subheader("Ausgeführte SQL-Abfrage:")
-    st.code(sql, language="sql", line_numbers=True, wrap_lines=True)
-    st.write(f"Parameter: {params}")
+    sql = str(query)
+    sql = sql.replace('"',"`")  # MySQL Backticks
+
+    if "show_sql" not in st.session_state:
+        st.session_state.show_sql = False
+
+    
+    def toggle_sql():
+        st.session_state.show_sql = not st.session_state.show_sql
+    st.button("SQL Query anzeigen/ausblenden", on_click=toggle_sql)
+
+    if st.session_state.show_sql:
+        st.subheader("Ausgeführte SQL-Abfrage:")
+        st.code(sql, language="sql", line_numbers=True, wrap_lines=True)
+    #st.write(f"Parameter: {params}")
 
     cursor = None
     try:
         cursor = conn.cursor(buffered=True)
-        cursor.execute(sql, tuple(params))
+        cursor.execute(sql)
         rows = cursor.fetchall()
         if cursor.description:
             cols = [c[0] for c in cursor.description]
