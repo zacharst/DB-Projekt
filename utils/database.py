@@ -47,8 +47,23 @@ def load_dataframe(conn, table_name, apply_joins=False):
     Returns:
         pd.DataFrame: DataFrame mit den geladenen Daten.
     """
-    with open(JOIN_CONFIG_PATH, "r", encoding="utf-8") as f:
-        join_config = json.load(f)
+
+    #nicht komplett implementier und hat momentan keinen Nutzen (mehr)
+    #Idee war, dass alles was in join_config.json eingetragen ist, dementsprechend zu joinen und anzuzeigen
+    
+    join_config = {}
+    try:
+        if os.path.exists(JOIN_CONFIG_PATH):
+            with open(JOIN_CONFIG_PATH, "r", encoding="utf-8") as f:
+                try:
+                    join_config = json.load(f) or {}
+                except json.JSONDecodeError:
+                    join_config = {}
+        else:
+            # Datei existiert nicht oder ist leer -> keine Joins anwenden
+            join_config = {}
+    except Exception:
+        join_config = {}
 
     cursor = conn.cursor()
     if apply_joins and table_name in join_config:
