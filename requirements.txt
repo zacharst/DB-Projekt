@@ -1,6 +1,6 @@
 mysql_connector_python==9.4.0
-pandas==2.3.2
-sqlparse==0.5.3
+numpy==2.3.3
+pandas==2.3.3
+pypika==0.48.9
 streamlit==1.49.1
-streamlit_dynamic_filters==0.1.9
 toml==0.10.2
