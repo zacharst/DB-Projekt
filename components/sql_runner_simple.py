@@ -155,7 +155,7 @@ WHERE o.ort_name = "Sporthalle";
     if "sql_text" not in st.session_state:
         st.session_state["sql_text"] = ""
 
-    # Wir benötigt, um die SQL Abfrage als Text anzuzeigen
+    # Wird benötigt, um die SQL Abfrage als Text anzuzeigen
     sql = st.text_area("SQL", height=240, key="sql_text")
 
     # Ausführen Button 

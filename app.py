@@ -76,7 +76,7 @@ def main():
             password=st.session_state["sql_password"]
         )
 
-    ## Nur Verwaltung und Kursleiter kriegen SQL-Abfrage und SQL-Filter angezeigt
+    ## Nur Verwaltung und Kursleiter kriegen SQL-Abfrage und Tabelle bearbeiten angezeigt
     if st.session_state["logged_in"]:
         tabs = ["Tabelle anzeigen", "SQL-Abfrage","Tabelle bearbeiten"]
         active_tab = st.radio("Wähle einen Tab", tabs, index=0)

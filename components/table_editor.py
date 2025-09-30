@@ -196,8 +196,8 @@ def table_editor(conn, table_name: str):
             try:
                 prepared = {k: (_to_python_value(v) if v is not None else None) for k, v in new_data.items()}
                 insert_entry(conn, table_name, prepared)
-                st.success("Eintrag hinzugefügt!")
                 st.rerun()
+                st.success("Eintrag hinzugefügt!")
             except mysql.Error as e:
                 st.error(_format_db_error(e))
                 with st.expander("Fehlerdetails"):
@@ -225,7 +225,7 @@ def table_editor(conn, table_name: str):
                         st.table(selected_row)
                         if st.button("Eintrag endgültig löschen"):
                             delete_entry(conn, table_name, pk_cols, pk_vals)
-                            st.success("Eintrag gelöscht!")
+                            st.success("Eintrag gelöscht!") #wird nur kurz angezeigt, wegen anderer Warnung
                             st.rerun()
                     else:
                         st.warning("Keine Zeile mit den angegebenen Primärschlüssel-Werten gefunden.")
@@ -316,8 +316,9 @@ def table_editor(conn, table_name: str):
                             try:
                                 prepared = {k: (_to_python_value(v) if v is not None else None) for k, v in updated_data.items()}
                                 update_entry(conn, table_name, prepared, pk_cols, pk_vals)
-                                st.success("Eintrag aktualisiert!")
                                 st.rerun()
+                                st.success("Eintrag aktualisiert!")
+
                             except Exception as e:
                                 st.error("Fehler beim Aktualisieren.")
                                 with st.expander("Fehlerdetails"):
