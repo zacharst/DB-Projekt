@@ -56,8 +56,11 @@ Danach öffnet sich die Oberfläche automatisch im Browser.
 * **Ohne Login**
 
   * Über den Tab **Tabelle anzeigen**, könenn Nutzer die Datenbank vollständig einsehen und die Tabellen filtern.
+<<<<<<< HEAD
 * Für jedes Attribut der Tabelle, kann eingestellt werden wie und ob es gefiltert werden soll. Zusätzlich kann ein Limit eingestellt werden.
 * Durch einen Button auf dem Streamlit UI können die parametrisierten Queries, die durch die vom User gesetzten Filter erstellt werden, angezeigt werden.
+=======
+>>>>>>> fix-pk-issue
 * Zusätzlich ist eine View **veranstaltung_auslastung** einsehbar, die angibt, wie stark die Sportangebote ausgebucht sind.
 
 * **Mit Login** (über die vorgegebenen Nutzerkonten `verwaltung` / `kursleiter`)
