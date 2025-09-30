@@ -2,7 +2,7 @@
 import streamlit as st
 import pandas as pd
 from utils.database import get_connection
-import _mysql_connector as mysql
+import mysql.connector as mysql
 
 def _execute_sql(conn, cursor, sql):
     """Führt die SQL-Query aus und zeigt Ergebnisse/Status in Streamlit an."""
@@ -125,7 +125,14 @@ SELECT sa.angebot_name, v.verfügbare_plätze
 FROM Veranstaltung v
 JOIN Sportangebot sa ON v.angebot_id = sa.angebot_id
 WHERE v.verfügbare_plätze > 5;
-"""
+""",
+"10: Veranstaltungen mit freien Plätzen in Sporthalle": """
+SELECT v.veranstaltungs_id, sa.angebot_name, o.ort_name, v.verfügbare_plätze
+FROM Veranstaltung v
+JOIN Sportangebot sa ON v.angebot_id = sa.angebot_id
+JOIN Ort o ON v.ort_id = o.ort_id
+WHERE o.ort_name = "Sporthalle";
+""" 
     }
 
     # Anzeigen der Beispiele
