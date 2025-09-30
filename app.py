@@ -88,7 +88,6 @@ def main():
     with st.sidebar:
         selected_table, filters, limit_active, default_limit, df_for_filters = show_sidebar(conn, active_tab)
 
-   
 
     if active_tab == "SQL-Abfrage":
         st.title("Freie SQL-Abfrage")
@@ -96,7 +95,8 @@ def main():
 
     elif active_tab == "Tabelle anzeigen":
         limit_to_use = default_limit if limit_active else None
-        st.title("Tabelle anzeigen")
+        show_table_title = f"Tabelle anzeigen: {selected_table}" if selected_table else "Tabelle anzeigen"
+        st.title(show_table_title)
         if df_for_filters is None or selected_table is None:
             st.info("Bitte wähle eine Tabelle in der Sidebar.")
         else:
