@@ -53,17 +53,15 @@ Danach öffnet sich die Oberfläche automatisch im Browser.
 
 ### 4. **Nutzung**
 
-* **Ohne Login**
+* #### **4.1 Ohne Login**
 
   * Über den Tab **Tabelle anzeigen**, könenn Nutzer die Datenbank vollständig einsehen und die Tabellen filtern.
-<<<<<<< HEAD
-* Für jedes Attribut der Tabelle, kann eingestellt werden wie und ob es gefiltert werden soll. Zusätzlich kann ein Limit eingestellt werden.
-* Durch einen Button auf dem Streamlit UI können die parametrisierten Queries, die durch die vom User gesetzten Filter erstellt werden, angezeigt werden.
-=======
->>>>>>> fix-pk-issue
-* Zusätzlich ist eine View **veranstaltung_auslastung** einsehbar, die angibt, wie stark die Sportangebote ausgebucht sind.
+  * Für jedes Attribut der Tabelle, kann eingestellt werden wie und ob es gefiltert werden soll. Zusätzlich kann ein Limit eingestellt werden.
+  * Durch einen Button auf dem Streamlit UI können die parametrisierten Queries, die durch die vom User gesetzten Filter erstellt werden, angezeigt werden.
 
-* **Mit Login** (über die vorgegebenen Nutzerkonten `verwaltung` / `kursleiter`)
+  * Zusätzlich ist eine View **veranstaltung_auslastung** einsehbar, die angibt, wie stark die Sportangebote ausgebucht sind.
+
+* #### **4.2 Mit Login** (über die vorgegebenen Nutzerkonten `verwaltung` / `kursleiter`)
 
   * Es besteht die Möglichkeit, sich mit verschiedenen Rollen einzuloggen. Dies ist notwendig, um alle Funktionalitäten nutzen zu können.
   * 1. `verwaltung` (Passwort: `1234`)
@@ -72,12 +70,12 @@ Danach öffnet sich die Oberfläche automatisch im Browser.
 
   * Nach erfolgreichem Login erscheinen zwei zusätzliche Tabs:
 
-  1. **SQL-Abfrage**
+  * #### **4.2.1 SQL-Abfrage**
 
      * Hier können beliebige SQL-Abfragen auf der Datenbank ausgeführt werden.
      * Zusätzlich stehen 10 Beispielabfragen zur Verfügung. Inklusive Join, Aggregation, Sub-Anfrage, Sum, Group by, Order by.
 
-  2. **Tabelle bearbeiten**
+  *  #### **4.2.2 Tabelle bearbeiten**
 
      * Berechtigungen hängen von der Rolle ab:
 
