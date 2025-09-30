@@ -6,7 +6,7 @@ from components.filter_panel import build_filters
 def show_sidebar(conn, active_tab: str, apply_joins: bool = False):
     """
     Zeigt die Sidebar mit Tabellen-Auswahl, Limit und Filtern an 
-    (nur in den Tabs 'Tabelle anzeigen' und 'SQL-Filter').
+    (nur in den Tabs 'Tabelle anzeigen' und 'Tabelle bearbeiten').
 
     Args:
         conn: Datenbankverbindung.
@@ -18,8 +18,6 @@ def show_sidebar(conn, active_tab: str, apply_joins: bool = False):
     """
     if active_tab not in ("Tabelle anzeigen","Tabelle bearbeiten"):
         return None, {}, False, 1000, None
-    
-
 
     st.header("Navigation / Auswahl")
 
