@@ -1,6 +1,8 @@
 # DB Projekt – Hochschulsport
 
 Dieses Projekt erstellt und verwaltet eine **Hochschulsport-Datenbank** mit einer Streamlit-Oberfläche.
+**Hinweis:** Alle Funktionen basieren auf **MySQL** als Datenbankmanagementsystem.
+
 
 ---
 
