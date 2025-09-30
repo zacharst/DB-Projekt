@@ -37,20 +37,20 @@ teilnehmer_adresse VARCHAR(100)
 );
 
 CREATE TABLE Studierende (
-teilnehmer_id INT NOT NULL,
+teilnehmer_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (teilnehmer_id) REFERENCES Kursteilnehmer(teilnehmer_id) ON DELETE CASCADE, 
 matrikelnummer INT
 );
 
 CREATE TABLE Beschäftigte (
-teilnehmer_id INT NOT NULL,
+teilnehmer_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (teilnehmer_id) REFERENCES Kursteilnehmer(teilnehmer_id) ON DELETE CASCADE, 
 personalnummer INT,
 abteilung VARCHAR(100)
 );
 
 CREATE TABLE Externe_Alumni (
-teilnehmer_id INT NOT NULL,
+teilnehmer_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (teilnehmer_id) REFERENCES Kursteilnehmer(teilnehmer_id) ON DELETE CASCADE, 
 mitgliedsnummer INT
 );
@@ -165,33 +165,33 @@ event_teilnahme_bedingungen VARCHAR(200)
 );
 
 CREATE TABLE Prüfung(
-veranstaltungs_id INT NOT NULL,
+veranstaltungs_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (veranstaltungs_id) REFERENCES Veranstaltung(Veranstaltungs_id) ON DELETE CASCADE,
 prüfungsform VARCHAR(50),
 passwort VARCHAR(50)
 );
 
 CREATE TABLE Gym_mitgliedschaft(
-veranstaltungs_id INT NOT NULL,
+veranstaltungs_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (veranstaltungs_id) REFERENCES Veranstaltung(Veranstaltungs_id) ON DELETE CASCADE,
 berechtigungen VARCHAR(50)
 );
 
 CREATE TABLE Onlinekurs(
-veranstaltungs_id INT NOT NULL,
+veranstaltungs_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (veranstaltungs_id) REFERENCES Veranstaltung(Veranstaltungs_id) ON DELETE CASCADE,
 zugangslink VARCHAR(50),
 plattform VARCHAR(50)
 );
 
 CREATE TABLE Offlinekurs(
-veranstaltungs_id INT NOT NULL,
+veranstaltungs_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (veranstaltungs_id) REFERENCES Veranstaltung(Veranstaltungs_id) ON DELETE CASCADE,
 wetterabhängig BOOL
 );
 
 CREATE TABLE Exkursion(
-veranstaltungs_id INT NOT NULL,
+veranstaltungs_id INT NOT NULL PRIMARY KEY,
 FOREIGN KEY (veranstaltungs_id) REFERENCES Veranstaltung(Veranstaltungs_id) ON DELETE CASCADE,
 exkursion_name VARCHAR(50),
 zielort VARCHAR(50),
@@ -354,7 +354,8 @@ BEGIN
     DECLARE al_id INT;
     SELECT anmeldungsliste_id INTO al_id
     FROM anmeldungsliste
-    WHERE veranstaltungs_id = NEW.veranstaltungs_id;
+    WHERE veranstaltungs_id = NEW.veranstaltungs_id
+    LIMIT 1; -- wegen updates Datenbankfehler (1172): Result consisted of more than one row
     IF NEW.buchung_status = 'bezahlt' THEN
         INSERT INTO Angemeldete_Kursteilnehmer (teilnehmer_id, anmeldungsliste_id)
         VALUES (NEW.teilnehmer_id, al_id)
@@ -680,11 +681,11 @@ SET DEFAULT ROLE rolle_kursleiter TO 'kursleiter'@'localhost';
 
 GRANT USAGE ON hochschulsport.* TO rolle_kursleiter;
 GRANT USAGE ON hochschulsport.* TO rolle_verwaltung;
-GRANT SELECT, INSERT, UPDATE, DELETE ON hochschulsport.Veranstaltung TO rolle_verwaltung;
-GRANT SELECT, INSERT, UPDATE, DELETE ON hochschulsport.Sportangebot TO rolle_verwaltung;
-GRANT SELECT ON hochschulsport.* TO rolle_verwaltung;
+GRANT SELECT, INSERT, UPDATE, DELETE ON hochschulsport.* TO rolle_verwaltung;
+GRANT SELECT ON hochschulsport.* TO rolle_kursleiter;
 GRANT DELETE, SELECT ON hochschulsport.Buchung TO rolle_kursleiter;
 GRANT UPDATE, SELECT ON hochschulsport.Buchung TO rolle_kursleiter;
-GRANT SELECT ON hochschulsport.Feedback TO rolle_kursleiter;
+GRANT DELETE, SELECT ON hochschulsport.Feedback TO rolle_kursleiter;
+GRANT UPDATE, SELECT ON hochschulsport.Feedback TO rolle_kursleiter;
 GRANT SELECT, SHOW VIEW ON hochschulsport.* TO rolle_verwaltung;
 FLUSH PRIVILEGES;
