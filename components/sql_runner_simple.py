@@ -4,12 +4,15 @@ import pandas as pd
 from utils.database import get_connection
 import mysql.connector as mysql
 
-def _execute_sql(conn, cursor, sql):
+def _execute_sql(conn, cursor, sql, params=None):
     """Führt die SQL-Query aus und zeigt Ergebnisse/Status in Streamlit an."""
     sql_upper = sql.strip().upper()
     try:
         if sql_upper.startswith("SELECT") or sql_upper.startswith("SHOW"):
-            cursor.execute(sql)
+            if params:
+                cursor.execute(sql, params)
+            else:
+                cursor.execute(sql)
             data = cursor.fetchall()
             if cursor.description is None:
                 st.warning("Keine Spaltenbeschreibung verfügbar. Keine Ergebnisse.")
@@ -26,7 +29,10 @@ def _execute_sql(conn, cursor, sql):
                 )
         else:
             # INSERT, UPDATE, DELETE
-            cursor.execute(sql)
+            if params:
+                cursor.execute(sql, params)
+            else:
+                cursor.execute(sql)
             conn.commit()
             st.success(f"Operation erfolgreich durchgeführt. {cursor.rowcount} Zeilen betroffen.")
     except mysql.Error as e:
@@ -38,23 +44,19 @@ def _execute_sql(conn, cursor, sql):
             st.error(f"Datenbankfehler ({errno}): {msg}")
 
 def run_custom_query():
-    """
-    Zeigt ein Textfeld für eine benutzerdefinierte SQL-Abfrage an und führt diese aus.
-
-    - SELECT-Abfragen: SQL Abfrage wird ausgeführt. Ergebnisse werden als DataFrame angezeigt.
-    - SQL-Befehle wie INSERT, UPDATE, DELETE werden ausgeführt und Änderungen übernommen.
-
-    Zusätzlich: bietet Beispiel-Queries an, die per Button geklickt und sofort ausgeführt werden.
-    """
+    """Streamlit-Komponente zum Ausführen eigener SQL-Queries mit Beispiel-Queries."""
     st.subheader("SQL-Abfrage ausführen")
-
 
     conn = get_connection(
         user=st.session_state["sql_user"],
         password=st.session_state["sql_password"]
     )
 
-    # Beispiel-Queries nach Projektbeschreibung
+    # Standardwert für parametrierten Ort setzen
+    if "ort_param" not in st.session_state:
+        st.session_state["ort_param"] = "Yogastudio"
+
+    # Beispiel-Queries
     example_queries = {
         "1: Anzeigen aller Studenten": """
 SELECT k.*, s.matrikelnummer
@@ -126,13 +128,37 @@ FROM Veranstaltung v
 JOIN Sportangebot sa ON v.angebot_id = sa.angebot_id
 WHERE v.verfügbare_plätze > 5;
 """,
-"10: Veranstaltungen mit freien Plätzen in Sporthalle": """
+        "10: Veranstaltungen mit freien Plätzen in Sporthalle": """
 SELECT v.veranstaltungs_id, sa.angebot_name, o.ort_name, v.verfügbare_plätze
 FROM Veranstaltung v
 JOIN Sportangebot sa ON v.angebot_id = sa.angebot_id
 JOIN Ort o ON v.ort_id = o.ort_id
 WHERE o.ort_name = "Sporthalle";
-""" 
+""",
+        "11: Verwaltungsangestellte die für Gesellschaftstanz verantwortlich sind": """
+SELECT vw.angestellten_name
+FROM Verwaltungsangestellter vw
+WHERE angestellten_id IN (
+    SELECT angestellten_id
+    FROM Verwaltete_veranstaltungen
+    WHERE veranstaltungs_id IN (
+        SELECT veranstaltungs_id
+        FROM Veranstaltung
+        WHERE angebot_id IN (
+            SELECT angebot_id
+            FROM Sportangebot sa
+            WHERE sa.angebot_name = "Gesellschaftstanz"
+        )
+    )
+);
+""",
+        "12: Veranstaltungen an bestimmtem Ort (parametrisiert)": """
+SELECT v.veranstaltungs_id, sa.angebot_name, o.ort_name, v.verfügbare_plätze
+FROM Veranstaltung v
+JOIN Sportangebot sa ON v.angebot_id = sa.angebot_id
+JOIN Ort o ON v.ort_id = o.ort_id
+WHERE o.ort_name = %s;
+"""
     }
 
     # Anzeigen der Beispiele
@@ -140,22 +166,17 @@ WHERE o.ort_name = "Sporthalle";
         st.write("Klicke auf einen Button, um die Query als Beispiel auszuführen.")
         for label, query in example_queries.items():
             if st.button(label):
-                # Setze die Textarea (session state) und führe die Query sofort aus
                 st.session_state["sql_text"] = query.strip()
-                try:
-                    conn = get_connection()
-                    cursor = conn.cursor()
-                    _execute_sql(conn, cursor, query)
-                    cursor.close()
-                    conn.close()
-                except Exception as e:
-                    st.error(f"Fehler bei der Ausführung des Beispiels: {e}")
+                st.session_state["selected_query"] = label
+
+    # Wenn Query 12 gewählt wurde, Eingabefeld für Parameter anzeigen
+    if st.session_state.get("selected_query") == "12: Veranstaltungen an bestimmtem Ort (parametrisiert)":
+        st.session_state["ort_param"] = st.text_input("Ort eingeben:", st.session_state["ort_param"])
 
     # Textarea für freie Eingabe
     if "sql_text" not in st.session_state:
         st.session_state["sql_text"] = ""
 
-    # Wird benötigt, um die SQL Abfrage als Text anzuzeigen
     sql = st.text_area("SQL", height=240, key="sql_text")
 
     # Ausführen Button 
@@ -163,9 +184,16 @@ WHERE o.ort_name = "Sporthalle";
         try:
             conn = get_connection()
             cursor = conn.cursor()
-            _execute_sql(conn, cursor, st.session_state["sql_text"])
+
+            if st.session_state.get("selected_query") == "12: Veranstaltungen an bestimmtem Ort (parametrisiert)":
+                params = (st.session_state["ort_param"],)
+            else:
+                params = None
+
+            _execute_sql(conn, cursor, st.session_state["sql_text"], params)
             cursor.close()
             conn.close()
         except Exception as e:
             st.error(f"Fehler bei der Ausführung: {e}")
+
     conn.close()
